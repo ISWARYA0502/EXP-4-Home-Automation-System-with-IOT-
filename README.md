@@ -14,6 +14,8 @@ Arduino software
 Jumper Wires
 
 # Circuit Diagram:
+<img width="1295" height="727" alt="image" src="https://github.com/user-attachments/assets/fb3e14a6-fcda-494a-ba8b-a2fb09b03910" />
+
 
 
 # Theory: 
@@ -26,6 +28,88 @@ When we apply an active high signal to the signal pin of the relay module from a
 
 
 # Program:
+#include <Servo.h>
+#include <LiquidCrystal.h>
+
+LiquidCrystal lcd(A1,10,9,6,5,3);
+float value;
+int tmp = A0;
+const int pingPin = 7;
+int servoPin = 8;
+
+Servo servo1;
+
+void setup() {
+  Serial.begin(9600);
+  servo1.attach(servoPin);
+  lcd.begin(16, 2);
+
+  pinMode(2, INPUT);    
+  pinMode(4, OUTPUT);   
+  pinMode(11, OUTPUT);  
+  pinMode(12, OUTPUT);  
+  pinMode(13, OUTPUT);  
+  pinMode(A0, INPUT);   
+}
+
+void loop() {
+  long duration, cm;
+  pinMode(pingPin, OUTPUT);
+  digitalWrite(pingPin, LOW);
+  delayMicroseconds(2);
+  digitalWrite(pingPin, HIGH);
+  delayMicroseconds(5);
+  digitalWrite(pingPin, LOW);
+
+  pinMode(pingPin, INPUT);
+  duration = pulseIn(pingPin, HIGH);
+  cm = microsecondsToCentimeters(duration);
+
+  if(cm < 40) {
+    servo1.write(90);
+    lcd.setCursor(0,1);
+    lcd.print("Door:OPEN   ");
+  } else {
+    servo1.write(0);
+    lcd.setCursor(0,1);
+    lcd.print("Door:CLOSED ");
+  }
+
+  int pir = digitalRead(2);
+  if(pir == HIGH) {
+    digitalWrite(4, HIGH);
+    lcd.setCursor(10,0);
+    lcd.print("LED:ON ");
+  } else {
+    digitalWrite(4, LOW);
+    lcd.setCursor(10,0);
+    lcd.print("LED:OFF");
+  }
+
+  
+  value = analogRead(tmp) * 0.004882814;
+  value = (value - 0.5) * 100.0;
+  lcd.setCursor(0,0);
+  lcd.print("Tmp:");
+  lcd.print(value);
+
+  Serial.print("temperature: ");
+  Serial.println(value);
+
+  if(value > 20) {
+    digitalWrite(12, HIGH);  // Hot LED ON
+    digitalWrite(13, LOW);
+  } else {
+    digitalWrite(12, LOW);
+    digitalWrite(13, HIGH);  // Cold LED ON
+  }
+
+  delay(500);
+}
+
+long microsecondsToCentimeters(long microseconds) {
+  return microseconds / 29 / 2;
+}
 
 
 
@@ -47,6 +131,9 @@ When we apply an active high signal to the signal pin of the relay module from a
 
 
 # Output:
+<img width="1600" height="801" alt="image" src="https://github.com/user-attachments/assets/ab945a22-d407-4f2d-b94c-eb1d0da5579c" />
+
 
 # Result:
+Thus the experiment of Home-Automation-System-with-IOT is successfully verified
 
